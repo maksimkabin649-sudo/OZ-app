@@ -7,7 +7,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1f5a66">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>">
-    <link rel="stylesheet" href="style.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
         body{background:#f4f7fb;display:flex;justify-content:center;padding:2rem 1rem}
@@ -53,7 +52,7 @@
     <div class="install-banner" id="installBanner">
         📱 Установите приложение <button id="installBtn">Установить</button>
     </div>
-    <div class="offline" id="offlineBanner">📡 Вы офлайн</div>
+    <div class="offline" id="offlineBanner">📡 Вы офлайн. Данные из кэша.</div>
     
     <div class="header">
         <h1>📍 Орехово-Зуево</h1>
@@ -91,7 +90,8 @@
 </div>
 
 <script>
-const places = JSON.parse(localStorage.getItem('places') || 'null') || [
+// ---- ДАННЫЕ ----
+const defaultPlaces = [
     {name:'Парк «Победа»',address:'ул. Ленина, 1, Орехово-Зуево',desc:'Центральный парк с фонтаном',type:'парк'},
     {name:'Краеведческий музей',address:'ул. Ленина, 15, Орехово-Зуево',desc:'История города',type:'музей'},
     {name:'ДК «Октябрь»',address:'ул. Ленина, 56, Орехово-Зуево',desc:'Культурный центр',type:'досуг'},
@@ -101,53 +101,182 @@ const places = JSON.parse(localStorage.getItem('places') || 'null') || [
     {name:'Собор Рождества Богородицы',address:'ул. Ленина, 78, Орехово-Зуево',desc:'Главный храм',type:'храм'}
 ];
 
-let deferredPrompt;
+let places = [];
+let deferredPrompt = null;
 
-function save() { localStorage.setItem('places', JSON.stringify(places)); }
+// ---- ЗАГРУЗКА ДАННЫХ ----
+function loadData() {
+    try {
+        const saved = localStorage.getItem('places');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                places = parsed;
+                return;
+            }
+        }
+    } catch(e) {}
+    places = defaultPlaces.map(p => ({...p}));
+    saveData();
+}
 
+function saveData() {
+    try {
+        localStorage.setItem('places', JSON.stringify(places));
+    } catch(e) {}
+}
+
+// ---- РЕНДЕР ----
 function render() {
-    const g = document.getElementById('placesGrid');
-    if(!places.length) { g.innerHTML='<div class="empty">✨ Нет мест · добавьте первое!</div>'; return; }
-    g.innerHTML = places.map((p,i)=>`
+    const grid = document.getElementById('placesGrid');
+    if (!places.length) {
+        grid.innerHTML = '<div class="empty">✨ Нет мест · добавьте первое!</div>';
+        return;
+    }
+    
+    grid.innerHTML = places.map((p, i) => `
         <div class="card">
-            <div class="name">${p.name} <span>📍</span></div>
-            <button class="del" data-i="${i}">✕</button>
-            <div class="address">🏠 ${p.address||'адрес не указан'}</div>
-            <div class="desc">${p.desc||'▪️ без описания'}</div>
-            <span class="type">${p.type||'место'}</span>
+            <div class="name">${escapeHtml(p.name)} <span>📍</span></div>
+            <button class="del" data-index="${i}">✕</button>
+            <div class="address">🏠 ${escapeHtml(p.address || 'адрес не указан')}</div>
+            <div class="desc">${escapeHtml(p.desc || '▪️ без описания')}</div>
+            <span class="type">${escapeHtml(p.type || 'место')}</span>
         </div>
     `).join('');
-    g.querySelectorAll('.del').forEach(b=>b.onclick=()=>{ places.splice(+b.dataset.i,1); save(); render(); showToast('🗑️ Удалено'); });
+    
+    // Удаление
+    grid.querySelectorAll('.del').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const idx = parseInt(this.dataset.index);
+            places.splice(idx, 1);
+            saveData();
+            render();
+            showToast('🗑️ Место удалено');
+        });
+    });
 }
 
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ---- ДОБАВЛЕНИЕ ----
 function addPlace() {
-    const n=document.getElementById('placeName'), a=document.getElementById('placeAddress'), d=document.getElementById('placeDesc');
-    if(!n.value.trim()) return alert('Введите название');
-    places.push({name:n.value.trim(), address:a.value.trim()+' Орехово-Зуево'||'Орехово-Зуево', desc:d.value.trim()||'▪️ без описания', type:'место'});
-    save(); render(); showToast('✅ Добавлено!'); n.value=''; a.value=''; d.value='';
+    const nameInput = document.getElementById('placeName');
+    const addressInput = document.getElementById('placeAddress');
+    const descInput = document.getElementById('placeDesc');
+    
+    const name = nameInput.value.trim();
+    if (!name) {
+        alert('Введите название места');
+        return;
+    }
+    
+    let address = addressInput.value.trim();
+    if (address && !address.toLowerCase().includes('орехово-зуево')) {
+        address += ', Орехово-Зуево';
+    } else if (!address) {
+        address = 'Орехово-Зуево';
+    }
+    
+    places.push({
+        name: name.slice(0, 40),
+        address: address.slice(0, 70),
+        desc: (descInput.value.trim() || '▪️ без описания').slice(0, 80),
+        type: 'место'
+    });
+    
+    saveData();
+    render();
+    showToast('✅ Место добавлено!');
+    nameInput.value = '';
+    addressInput.value = '';
+    descInput.value = '';
 }
 
-function showToast(t) {
-    const old=document.querySelector('.toast'); if(old) old.remove();
-    const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el);
-    setTimeout(()=>el.remove(),2500);
+// ---- TOAST ----
+function showToast(message) {
+    const old = document.querySelector('.toast');
+    if (old) old.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// Установка PWA
-window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBanner').classList.add('active'); });
-document.getElementById('installBtn').onclick=async()=>{ if(deferredPrompt){ const r=await deferredPrompt.prompt(); if(r.outcome==='accepted'){ document.getElementById('installBanner').classList.remove('active'); showToast('🎉 Установлено!'); } } };
+// ---- PWA УСТАНОВКА ----
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('active');
+});
 
-// Офлайн
-window.addEventListener('online',()=>document.getElementById('offlineBanner').classList.remove('active'));
-window.addEventListener('offline',()=>document.getElementById('offlineBanner').classList.add('active'));
+document.getElementById('installBtn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+            document.getElementById('installBanner').classList.remove('active');
+            showToast('🎉 Приложение установлено!');
+        }
+        deferredPrompt = null;
+    }
+});
 
-// Service Worker
-if('serviceWorker' in navigator) navigator.serviceWorker.register('serviceworker.js');
+window.addEventListener('appinstalled', () => {
+    document.getElementById('installBanner').classList.remove('active');
+    showToast('🎉 Спасибо за установку!');
+});
 
-// Инициализация
+// ---- ОФЛАЙН ----
+function updateOnlineStatus() {
+    const banner = document.getElementById('offlineBanner');
+    if (!navigator.onLine) {
+        banner.classList.add('active');
+    } else {
+        banner.classList.remove('active');
+    }
+}
+
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ---- SERVICE WORKER ----
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('serviceworker.js')
+            .then(function(registration) {
+                console.log('✅ Service Worker зарегистрирован:', registration.scope);
+            })
+            .catch(function(error) {
+                console.log('❌ Ошибка регистрации SW:', error);
+            });
+    });
+}
+
+// ---- ИНИЦИАЛИЗАЦИЯ ----
+loadData();
 render();
-document.getElementById('addPlaceBtn').onclick=addPlace;
-['placeName','placeAddress','placeDesc'].forEach(id=>document.getElementById(id).addEventListener('keypress',e=>{if(e.key==='Enter')addPlace()}));
+
+document.getElementById('addPlaceBtn').addEventListener('click', addPlace);
+
+// Enter
+document.getElementById('placeName').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addPlace();
+});
+document.getElementById('placeAddress').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addPlace();
+});
+document.getElementById('placeDesc').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addPlace();
+});
 </script>
 </body>
 </html>
