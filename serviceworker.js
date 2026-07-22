@@ -1,13 +1,11 @@
 // Service Worker для PWA приложения "Орехово-Зуево"
 
-const CACHE_NAME = 'orekhovo-zuevo-v1';
+const CACHE_NAME = 'orekhovo-zuevo-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Иконки (если есть)
-  '/icon-192.png',
-  '/icon-512.png'
+  '/style.css'
 ];
 
 // Устанавливаем кэш при установке SW
@@ -44,28 +42,23 @@ self.addEventListener('activate', function(event) {
 
 // Стратегия: кэш сначала, потом сеть (Cache First)
 self.addEventListener('fetch', function(event) {
-  // Игнорируем запросы к API и внешним ресурсам
   const url = new URL(event.request.url);
   
-  // Для HTML и основных ресурсов - используем кэш
+  // Кэшируем только свои ресурсы
   if (event.request.mode === 'navigate' || 
       event.request.destination === 'document' ||
       event.request.destination === 'script' ||
-      event.request.destination === 'style' ||
-      event.request.destination === 'image') {
+      event.request.destination === 'style') {
     
     event.respondWith(
       caches.match(event.request)
         .then(function(cachedResponse) {
           if (cachedResponse) {
-            // Возвращаем из кэша
             return cachedResponse;
           }
           
-          // Если нет в кэше - идём в сеть
           return fetch(event.request)
             .then(function(networkResponse) {
-              // Кэшируем ответ для будущих запросов
               if (networkResponse && networkResponse.status === 200) {
                 const responseClone = networkResponse.clone();
                 caches.open(CACHE_NAME)
@@ -76,9 +69,8 @@ self.addEventListener('fetch', function(event) {
               return networkResponse;
             })
             .catch(function(error) {
-              // Если сеть недоступна и нет кэша - возвращаем fallback
-              console.log('⚠️ Сеть недоступна, fallback:', error);
-              return new Response('Офлайн - страница не доступна', {
+              console.log('⚠️ Сеть недоступна');
+              return new Response('Вы офлайн. Приложение работает в автономном режиме.', {
                 status: 503,
                 statusText: 'Service Unavailable'
               });
@@ -86,31 +78,8 @@ self.addEventListener('fetch', function(event) {
         })
     );
   } else {
-    // Для остальных запросов - только сеть
     event.respondWith(fetch(event.request));
   }
-});
-
-// Обработка push-уведомлений (опционально)
-self.addEventListener('push', function(event) {
-  const title = 'Орехово-Зуево';
-  const options = {
-    body: 'Новое место добавлено!',
-    icon: 'icon-192.png',
-    badge: 'icon-192.png'
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Обработка кликов по уведомлениям
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
 });
 
 console.log('✅ Service Worker загружен');
