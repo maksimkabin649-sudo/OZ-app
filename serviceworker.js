@@ -1,5 +1,5 @@
-const CACHE_NAME = 'orekhovo-v1';
-const FILES = ['/', '/index.html', '/manifest.json'];
+const CACHE_NAME = 'orekhovo-v2';
+const FILES = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
