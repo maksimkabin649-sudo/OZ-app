@@ -1,20 +1,19 @@
-// Service Worker для PWA приложения "Орехово-Зуево"
+// Service Worker для PWA
 
-const CACHE_NAME = 'orekhovo-zuevo-v2';
-const STATIC_ASSETS = [
+const CACHE_NAME = 'orekhovo-v1';
+const FILES = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/style.css'
+  '/manifest.json'
 ];
 
-// Устанавливаем кэш при установке SW
+// Установка
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('📦 Кэширование статики');
-        return cache.addAll(STATIC_ASSETS);
+        console.log('📦 Кэширование');
+        return cache.addAll(FILES);
       })
       .then(function() {
         return self.skipWaiting();
@@ -22,14 +21,14 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// Активация и очистка старых кэшей
+// Активация
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.map(function(cacheName) {
           if (cacheName !== CACHE_NAME) {
-            console.log('🗑️ Удаление старого кэша:', cacheName);
+            console.log('🗑️ Удаление:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -40,46 +39,33 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Стратегия: кэш сначала, потом сеть (Cache First)
+// Перехват запросов
 self.addEventListener('fetch', function(event) {
-  const url = new URL(event.request.url);
-  
-  // Кэшируем только свои ресурсы
-  if (event.request.mode === 'navigate' || 
-      event.request.destination === 'document' ||
-      event.request.destination === 'script' ||
-      event.request.destination === 'style') {
-    
-    event.respondWith(
-      caches.match(event.request)
-        .then(function(cachedResponse) {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          
-          return fetch(event.request)
-            .then(function(networkResponse) {
-              if (networkResponse && networkResponse.status === 200) {
-                const responseClone = networkResponse.clone();
-                caches.open(CACHE_NAME)
-                  .then(function(cache) {
-                    cache.put(event.request, responseClone);
-                  });
-              }
-              return networkResponse;
-            })
-            .catch(function(error) {
-              console.log('⚠️ Сеть недоступна');
-              return new Response('Вы офлайн. Приложение работает в автономном режиме.', {
-                status: 503,
-                statusText: 'Service Unavailable'
-              });
+  event.respondWith(
+    caches.match(event.request)
+      .then(function(cached) {
+        if (cached) {
+          return cached;
+        }
+        return fetch(event.request)
+          .then(function(response) {
+            if (response && response.status === 200) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME)
+                .then(function(cache) {
+                  cache.put(event.request, clone);
+                });
+            }
+            return response;
+          })
+          .catch(function() {
+            return new Response('Офлайн режим', {
+              status: 503,
+              statusText: 'Offline'
             });
-        })
-    );
-  } else {
-    event.respondWith(fetch(event.request));
-  }
+          });
+      })
+  );
 });
 
 console.log('✅ Service Worker загружен');
