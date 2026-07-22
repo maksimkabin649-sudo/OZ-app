@@ -1,0 +1,769 @@
+/* ============================================
+   📱 PWA ПРИЛОЖЕНИЕ "Орехово-Зуево"
+   Стили для достопримечательностей города
+   ============================================ */
+
+/* ============================================
+   🎯 1. СБРОС И БАЗОВЫЕ СТИЛИ
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background: #f4f7fb;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+}
+
+/* ============================================
+   📦 2. КОНТЕЙНЕР
+   ============================================ */
+
+.container {
+    max-width: 1000px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 2rem;
+    padding: 2rem 1.8rem;
+    box-shadow: 0 20px 40px -10px rgba(0, 20, 30, 0.15);
+}
+
+/* ============================================
+   📱 3. БАННЕР УСТАНОВКИ PWA
+   ============================================ */
+
+.install-banner {
+    display: none;
+    background: linear-gradient(135deg, #1f5a66, #0f414e);
+    color: #ffffff;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(31, 90, 102, 0.3);
+}
+
+.install-banner.active {
+    display: block;
+    animation: slideDown 0.4s ease;
+}
+
+.install-banner button {
+    background: #ffffff;
+    color: #1f5a66;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.install-banner button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   📡 4. ОФЛАЙН БАННЕР
+   ============================================ */
+
+.offline {
+    display: none;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: #ffffff;
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.offline.active {
+    display: block;
+    animation: slideDown 0.4s ease;
+}
+
+/* ============================================
+   🏷️ 5. ЗАГОЛОВКИ И ХЕДЕР
+   ============================================ */
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+}
+
+h1 {
+    font-size: 2.2rem;
+    color: #1e3a4b;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Плашки-бейджи */
+.badge {
+    background: #e6f0f4;
+    padding: 0.3rem 1rem;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1f5a66;
+    border: 1px solid #b6d0d4;
+    white-space: nowrap;
+}
+
+.pwa {
+    background: #2d6a7a;
+    color: #ffffff;
+    padding: 0.2rem 0.8rem;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    animation: pulse 2s infinite;
+}
+
+.subhead {
+    color: #3e5f6b;
+    margin-bottom: 2rem;
+    border-left: 5px solid #5f9ea0;
+    padding-left: 1rem;
+    font-weight: 400;
+    font-size: 1.05rem;
+}
+
+/* ============================================
+   🃏 6. СЕТКА КАРТОЧЕК
+   ============================================ */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+/* ============================================
+   🃏 7. КАРТОЧКА МЕСТА
+   ============================================ */
+
+.card {
+    background: #f9fcff;
+    border-radius: 1.5rem;
+    padding: 1.2rem;
+    border: 1px solid #e9edf2;
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: #b6d0d4;
+    box-shadow: 0 8px 24px rgba(70, 130, 140, 0.08);
+}
+
+.card:active {
+    transform: scale(0.98);
+}
+
+/* Метка города на карточке */
+.card::before {
+    content: "Орехово-Зуево";
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    background: linear-gradient(135deg, #5f9ea0, #3a7a7d);
+    color: #ffffff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.15rem 0.8rem;
+    border-radius: 30px;
+    opacity: 0.7;
+    box-shadow: 0 2px 8px rgba(95, 158, 160, 0.3);
+    letter-spacing: 0.3px;
+}
+
+/* Название места */
+.name {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #0a2a36;
+    padding-right: 30px;
+}
+
+/* Адрес */
+.address {
+    font-size: 0.9rem;
+    color: #2d6a7a;
+    background: #e6f0f4;
+    padding: 0.25rem 0.8rem;
+    border-radius: 30px;
+    display: inline-block;
+    margin: 0.4rem 0 0.3rem;
+}
+
+/* Описание */
+.desc {
+    color: #2d4c58;
+    margin: 0.3rem 0 0.2rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    opacity: 0.9;
+}
+
+/* Тип места */
+.type {
+    display: inline-block;
+    background: #e1edf2;
+    padding: 0.2rem 0.9rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1f4e5a;
+    margin-top: 0.4rem;
+    letter-spacing: 0.3px;
+}
+
+/* Кнопка удаления */
+.del {
+    background: none;
+    border: none;
+    color: #acbcc5;
+    font-size: 1.2rem;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    transition: transform 0.25s ease, color 0.25s ease;
+    padding: 0 0.2rem;
+}
+
+.del:hover {
+    color: #c44a4a;
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* ============================================
+   ➕ 8. БЛОК ДОБАВЛЕНИЯ
+   ============================================ */
+
+.add-section {
+    background: #edf4f7;
+    border-radius: 2rem;
+    padding: 1.6rem 1.8rem;
+    border: 2px dashed #b6d0d4;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.add-section:hover {
+    border-color: #5f9ea0;
+    background: #e8f0f4;
+}
+
+.add-section h3 {
+    font-size: 1.2rem;
+    color: #1a4050;
+    margin-bottom: 1rem;
+}
+
+/* ============================================
+   📝 9. ФОРМА
+   ============================================ */
+
+.form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.form-group {
+    flex: 1 0 160px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #325b69;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.4px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid #cddee5;
+    border-radius: 40px;
+    font-size: 0.95rem;
+    background: #ffffff;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.form-group input:hover {
+    border-color: #8fb6be;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3c8a94;
+    box-shadow: 0 0 0 3px rgba(60, 138, 148, 0.15);
+    transform: translateY(-2px);
+}
+
+.form-group input::placeholder {
+    color: #a0b8c4;
+}
+
+/* ============================================
+   🎯 10. КНОПКА ДОБАВЛЕНИЯ
+   ============================================ */
+
+.add-btn {
+    background: linear-gradient(135deg, #1f5a66, #0f414e);
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.7rem 2rem;
+    border-radius: 40px;
+    cursor: pointer;
+    height: 48px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    box-shadow: 0 4px 12px rgba(31, 90, 102, 0.2);
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.add-btn:hover {
+    background: linear-gradient(135deg, #0f414e, #0a2a36);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(31, 90, 102, 0.3);
+}
+
+.add-btn:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   🪹 11. ПУСТОЕ СОСТОЯНИЕ
+   ============================================ */
+
+.empty {
+    text-align: center;
+    color: #6f8e9a;
+    padding: 2rem 0;
+    font-style: italic;
+    grid-column: 1 / -1;
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   📌 12. ФУТЕР
+   ============================================ */
+
+.footer {
+    margin-top: 1.8rem;
+    font-size: 0.8rem;
+    color: #5f7f8a;
+    text-align: center;
+    border-top: 1px solid #dfe9ef;
+    padding-top: 1.2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.footer span {
+    background: #e6f0f4;
+    padding: 0.2rem 1rem;
+    border-radius: 30px;
+    color: #1f5a66;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.footer span:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(31, 90, 102, 0.1);
+}
+
+/* ============================================
+   🍞 13. TOAST УВЕДОМЛЕНИЕ
+   ============================================ */
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #1f5a66, #0f414e);
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    z-index: 999;
+    box-shadow: 0 8px 30px rgba(31, 90, 102, 0.25);
+    animation: slideUp 0.4s ease;
+    max-width: 320px;
+    font-weight: 500;
+}
+
+/* ============================================
+   🎬 14. АНИМАЦИИ
+   ============================================ */
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ============================================
+   📱 15. АДАПТИВ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+   ============================================ */
+
+/* Планшеты и маленькие ноутбуки */
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+}
+
+/* Телефоны */
+@media (max-width: 500px) {
+    .container {
+        padding: 1.2rem;
+        border-radius: 1.2rem;
+    }
+    
+    h1 {
+        font-size: 1.6rem;
+    }
+    
+    .header {
+        gap: 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.8rem;
+    }
+    
+    .pwa {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.6rem;
+    }
+    
+    .subhead {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        padding-left: 0.8rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .name {
+        font-size: 1.1rem;
+        padding-right: 25px;
+    }
+    
+    .add-section {
+        padding: 1.2rem;
+        border-radius: 1.5rem;
+    }
+    
+    .add-section h3 {
+        font-size: 1rem;
+    }
+    
+    .form {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .form-group {
+        flex: 1 1 100%;
+    }
+    
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.7rem 1rem;
+    }
+    
+    .footer {
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .toast {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        font-size: 0.9rem;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.8rem;
+        text-align: center;
+    }
+    
+    .install-banner {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .install-banner button {
+        padding: 0.4rem 1.2rem;
+        font-size: 0.85rem;
+    }
+    
+    .card::before {
+        font-size: 0.5rem;
+        padding: 0.1rem 0.6rem;
+        top: -6px;
+        right: 8px;
+    }
+}
+
+/* Очень маленькие телефоны */
+@media (max-width: 360px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 1.3rem;
+    }
+    
+    .name {
+        font-size: 1rem;
+    }
+    
+    .address {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+    }
+    
+    .desc {
+        font-size: 0.85rem;
+    }
+    
+    .form-group input {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   🖨️ 16. ПЕЧАТЬ
+   ============================================ */
+
+@media print {
+    .install-banner,
+    .offline,
+    .add-section,
+    .del,
+    .pwa,
+    .badge {
+        display: none !important;
+    }
+    
+    .container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .card {
+        break-inside: avoid;
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+    
+    .card::before {
+        display: none;
+    }
+}
+
+/* ============================================
+   ♿ 17. ДОСТУПНОСТЬ
+   ============================================ */
+
+/* Уменьшение анимации для пользователей с vestibular disorder */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Фокус для навигации с клавиатуры */
+:focus-visible {
+    outline: 3px solid #5f9ea0;
+    outline-offset: 2px;
+}
+
+/* ============================================
+   🌙 18. ТЁМНАЯ ТЕМА (опционально)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a2e;
+    }
+    
+    .container {
+        background: rgba(30, 30, 50, 0.95);
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    h1 {
+        color: #e0e0e0;
+    }
+    
+    .subhead {
+        color: #8fa8b4;
+    }
+    
+    .card {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .card:hover {
+        border-color: rgba(95, 158, 160, 0.3);
+    }
+    
+    .name {
+        color: #e0e0e0;
+    }
+    
+    .desc {
+        color: #b0b0b0;
+    }
+    
+    .address {
+        background: rgba(255, 255, 255, 0.08);
+        color: #8fcbd8;
+    }
+    
+    .type {
+        background: rgba(255, 255, 255, 0.08);
+        color: #b0b0b0;
+    }
+    
+    .add-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .add-section:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .add-section h3 {
+        color: #b0b0b0;
+    }
+    
+    .form-group label {
+        color: #8fa8b4;
+    }
+    
+    .form-group input {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e0e0e0;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .form-group input:focus {
+        border-color: #5f9ea0;
+        box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.2);
+    }
+    
+    .form-group input::placeholder {
+        color: #666;
+    }
+    
+    .badge {
+        background: rgba(255, 255, 255, 0.08);
+        color: #8fcbd8;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .footer span {
+        background: rgba(255, 255, 255, 0.05);
+        color: #8fa8b4;
+    }
+    
+    .empty {
+        color: #666;
+    }
+    
+    .del {
+        color: #666;
+    }
+    
+    .del:hover {
+        color: #ff6b6b;
+    }
+    
+    .card::before {
+        background: linear-gradient(135deg, #3a7a7d, #1f5a66);
+    }
+}
