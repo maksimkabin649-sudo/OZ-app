@@ -1,13 +1,6 @@
-// Service Worker для PWA
-
 const CACHE_NAME = 'orekhovo-v1';
-const FILES = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
+const FILES = ['/', '/index.html', '/manifest.json'];
 
-// Установка
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -21,7 +14,6 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// Активация
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
@@ -39,30 +31,23 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Перехват запросов
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
       .then(function(cached) {
-        if (cached) {
-          return cached;
-        }
+        if (cached) return cached;
         return fetch(event.request)
           .then(function(response) {
             if (response && response.status === 200) {
               const clone = response.clone();
-              caches.open(CACHE_NAME)
-                .then(function(cache) {
-                  cache.put(event.request, clone);
-                });
+              caches.open(CACHE_NAME).then(function(cache) {
+                cache.put(event.request, clone);
+              });
             }
             return response;
           })
           .catch(function() {
-            return new Response('Офлайн режим', {
-              status: 503,
-              statusText: 'Offline'
-            });
+            return new Response('Офлайн режим', { status: 503 });
           });
       })
   );

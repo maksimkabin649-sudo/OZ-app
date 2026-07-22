@@ -144,7 +144,6 @@ function render() {
         </div>
     `).join('');
     
-    // Удаление
     grid.querySelectorAll('.del').forEach(btn => {
         btn.addEventListener('click', function() {
             const idx = parseInt(this.dataset.index);
@@ -267,15 +266,10 @@ render();
 
 document.getElementById('addPlaceBtn').addEventListener('click', addPlace);
 
-// Enter
-document.getElementById('placeName').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addPlace();
-});
-document.getElementById('placeAddress').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addPlace();
-});
-document.getElementById('placeDesc').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addPlace();
+['placeName', 'placeAddress', 'placeDesc'].forEach(id => {
+    document.getElementById(id).addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addPlace();
+    });
 });
 </script>
 </body>

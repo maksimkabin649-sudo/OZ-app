@@ -1,12 +1,8 @@
 {
-  "name": "Орехово-Зуево - Достопримечательности",
+  "name": "Орехово-Зуево",
   "short_name": "Орехово-Зуево",
-  "description": "Путеводитель по достопримечательностям города Орехово-Зуево",
   "start_url": "/index.html",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#f4f7fb",
-  "theme_color": "#1f5a66",
-  "orientation": "portrait",
-  "scope": "/"
+  "theme_color": "#1f5a66"
 }
