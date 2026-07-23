@@ -12,24 +12,28 @@
 <body>
 <div class="container">
     <div class="install-banner" id="installBanner">
-        📱 Установите приложение <button id="installBtn">Установить</button>
+        Установите приложение <button id="installBtn">Установить</button>
     </div>
-    <div class="offline" id="offlineBanner">📡 Вы офлайн. Данные из кэша.</div>
+    <div class="offline" id="offlineBanner">Вы офлайн. Данные из кэша.</div>
     
     <div class="header">
-        <h1>📍 Орехово-Зуево</h1>
-        <span class="badge">✅ Все места в городе</span>
-        <span class="pwa">📱 PWA</span>
+        <h1>Орехово-Зуево</h1>
+        <span class="badge">Все места в городе</span>
+        <span class="pwa">PWA</span>
     </div>
     <div class="subhead">Достопримечательности · адрес + описание</div>
+
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+        <button id="notifyBtn" class="notify-btn">Включить уведомления</button>
+    </div>
 
     <div class="grid" id="placesGrid"></div>
 
     <div class="add-section">
-        <h3>➕ Добавить место</h3>
+        <h3>Добавить место</h3>
         <div class="form">
             <div class="form-group">
-                <label>Название *</label>
+                <label>Название</label>
                 <input type="text" id="placeName" placeholder="Название" maxlength="40">
             </div>
             <div class="form-group">
@@ -40,25 +44,26 @@
                 <label>Описание</label>
                 <input type="text" id="placeDesc" placeholder="Кратко" maxlength="80">
             </div>
-            <button class="add-btn" id="addPlaceBtn">➕ Добавить</button>
+            <button class="add-btn" id="addPlaceBtn">Добавить</button>
         </div>
     </div>
     
     <div class="footer">
-        <span>🏙️ Орехово-Зуево</span>
-        <span>⚡ Нажмите ❌ чтобы удалить</span>
-        <span>📱 Работает офлайн</span>
+        <span>Орехово-Зуево</span>
+        <span>Нажмите для удаления</span>
+        <span>Работает офлайн</span>
+        <span>Уведомления</span>
     </div>
 </div>
 
 <script>
-// ---- ДАННЫЕ ----
+// Данные
 const defaultPlaces = [
-    {name:'Парк «Победа»',address:'ул. Ленина, 1, Орехово-Зуево',desc:'Центральный парк с фонтаном',type:'парк'},
+    {name:'Парк Победа',address:'ул. Ленина, 1, Орехово-Зуево',desc:'Центральный парк с фонтаном',type:'парк'},
     {name:'Краеведческий музей',address:'ул. Ленина, 15, Орехово-Зуево',desc:'История города',type:'музей'},
-    {name:'ДК «Октябрь»',address:'ул. Ленина, 56, Орехово-Зуево',desc:'Культурный центр',type:'досуг'},
+    {name:'ДК Октябрь',address:'ул. Ленина, 56, Орехово-Зуево',desc:'Культурный центр',type:'досуг'},
     {name:'Набережная Клязьмы',address:'ул. Набережная, 2, Орехово-Зуево',desc:'Прогулка у воды',type:'природа'},
-    {name:'Сквер «Молодёжный»',address:'ул. Мира, 12, Орехово-Зуево',desc:'Тихий сквер',type:'отдых'},
+    {name:'Сквер Молодёжный',address:'ул. Мира, 12, Орехово-Зуево',desc:'Тихий сквер',type:'отдых'},
     {name:'Фонтан на площади',address:'пл. Пушкина, 1, Орехово-Зуево',desc:'Главный фонтан',type:'достопримечательность'},
     {name:'Собор Рождества Богородицы',address:'ул. Ленина, 78, Орехово-Зуево',desc:'Главный храм',type:'храм'}
 ];
@@ -66,7 +71,7 @@ const defaultPlaces = [
 let places = [];
 let deferredPrompt = null;
 
-// ---- ЗАГРУЗКА ДАННЫХ ----
+// Загрузка данных
 function loadData() {
     try {
         const saved = localStorage.getItem('places');
@@ -88,20 +93,77 @@ function saveData() {
     } catch(e) {}
 }
 
-// ---- РЕНДЕР ----
+// Уведомления
+function requestNotificationPermission() {
+    if (!("Notification" in window)) {
+        showToast('Браузер не поддерживает уведомления');
+        return;
+    }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+            console.log("Разрешение на уведомления получено");
+            showNotification(
+                "Уведомления включены",
+                "Вы будете получать уведомления от Орехово-Зуево"
+            );
+            showToast('Уведомления включены');
+        } else {
+            console.log("Разрешение на уведомления отклонено");
+            showToast('Уведомления отключены');
+        }
+    });
+}
+
+function showNotification(title, body) {
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+        showToast('Сначала включите уведомления');
+        return;
+    }
+
+    const options = {
+        body: body || "Привет от Орехово-Зуево",
+        icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>",
+        badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>",
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        data: {
+            url: window.location.href
+        }
+    };
+
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(title || "Орехово-Зуево", options);
+        });
+    } else {
+        new Notification(title || "Орехово-Зуево", options);
+    }
+}
+
+function notifyNewPlace(placeName) {
+    if (Notification.permission === "granted") {
+        showNotification(
+            "Новое место",
+            "Добавлено: " + placeName + " в Орехово-Зуево"
+        );
+    }
+}
+
+// Рендер
 function render() {
     const grid = document.getElementById('placesGrid');
     if (!places.length) {
-        grid.innerHTML = '<div class="empty">✨ Нет мест · добавьте первое!</div>';
+        grid.innerHTML = '<div class="empty">Нет мест. Добавьте первое.</div>';
         return;
     }
     
     grid.innerHTML = places.map((p, i) => `
         <div class="card">
-            <div class="name">${escapeHtml(p.name)} <span>📍</span></div>
-            <button class="del" data-index="${i}">✕</button>
-            <div class="address">🏠 ${escapeHtml(p.address || 'адрес не указан')}</div>
-            <div class="desc">${escapeHtml(p.desc || '▪️ без описания')}</div>
+            <div class="name">${escapeHtml(p.name)}</div>
+            <button class="del" data-index="${i}">X</button>
+            <div class="address">${escapeHtml(p.address || 'адрес не указан')}</div>
+            <div class="desc">${escapeHtml(p.desc || 'без описания')}</div>
             <span class="type">${escapeHtml(p.type || 'место')}</span>
         </div>
     `).join('');
@@ -109,10 +171,11 @@ function render() {
     grid.querySelectorAll('.del').forEach(btn => {
         btn.addEventListener('click', function() {
             const idx = parseInt(this.dataset.index);
+            const placeName = places[idx].name;
             places.splice(idx, 1);
             saveData();
             render();
-            showToast('🗑️ Место удалено');
+            showToast('Место "' + placeName + '" удалено');
         });
     });
 }
@@ -124,7 +187,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ---- ДОБАВЛЕНИЕ ----
+// Добавление
 function addPlace() {
     const nameInput = document.getElementById('placeName');
     const addressInput = document.getElementById('placeAddress');
@@ -138,27 +201,31 @@ function addPlace() {
     
     let address = addressInput.value.trim();
     if (address && !address.toLowerCase().includes('орехово-зуево')) {
-        address += ', Орехово-Зуево';
+        address = address + ', Орехово-Зуево';
     } else if (!address) {
         address = 'Орехово-Зуево';
     }
     
-    places.push({
+    const newPlace = {
         name: name.slice(0, 40),
         address: address.slice(0, 70),
-        desc: (descInput.value.trim() || '▪️ без описания').slice(0, 80),
+        desc: (descInput.value.trim() || 'без описания').slice(0, 80),
         type: 'место'
-    });
+    };
     
+    places.push(newPlace);
     saveData();
     render();
-    showToast('✅ Место добавлено!');
+    showToast('Место "' + name + '" добавлено');
+    
+    notifyNewPlace(name);
+    
     nameInput.value = '';
     addressInput.value = '';
     descInput.value = '';
 }
 
-// ---- TOAST ----
+// Toast
 function showToast(message) {
     const old = document.querySelector('.toast');
     if (old) old.remove();
@@ -171,7 +238,7 @@ function showToast(message) {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// ---- PWA УСТАНОВКА ----
+// PWA установка
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -184,7 +251,8 @@ document.getElementById('installBtn').addEventListener('click', async () => {
         const result = await deferredPrompt.userChoice;
         if (result.outcome === 'accepted') {
             document.getElementById('installBanner').classList.remove('active');
-            showToast('🎉 Приложение установлено!');
+            showToast('Приложение установлено');
+            showNotification('Установка завершена', 'Приложение Орехово-Зуево успешно установлено');
         }
         deferredPrompt = null;
     }
@@ -192,10 +260,10 @@ document.getElementById('installBtn').addEventListener('click', async () => {
 
 window.addEventListener('appinstalled', () => {
     document.getElementById('installBanner').classList.remove('active');
-    showToast('🎉 Спасибо за установку!');
+    showToast('Спасибо за установку');
 });
 
-// ---- ОФЛАЙН ----
+// Офлайн
 function updateOnlineStatus() {
     const banner = document.getElementById('offlineBanner');
     if (!navigator.onLine) {
@@ -209,27 +277,52 @@ window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
-// ---- SERVICE WORKER ----
+// Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('serviceworker.js')
             .then(function(registration) {
-                console.log('✅ Service Worker зарегистрирован:', registration.scope);
+                console.log('Service Worker зарегистрирован:', registration.scope);
             })
             .catch(function(error) {
-                console.log('❌ Ошибка регистрации SW:', error);
+                console.log('Ошибка регистрации SW:', error);
             });
     });
 }
 
-// ---- ИНИЦИАЛИЗАЦИЯ ----
+// Инициализация уведомлений
+if ("Notification" in window && Notification.permission === "default") {
+    setTimeout(function() {
+        if (confirm("Включить уведомления от Орехово-Зуево?\n\nВы будете получать оповещения о новых местах.")) {
+            requestNotificationPermission();
+        }
+    }, 2000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('notifyBtn');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            if (Notification.permission === "granted") {
+                showNotification(
+                    "Уведомления включены",
+                    "Орехово-Зуево будет присылать вам оповещения"
+                );
+            } else {
+                requestNotificationPermission();
+            }
+        });
+    }
+});
+
+// Инициализация
 loadData();
 render();
 
 document.getElementById('addPlaceBtn').addEventListener('click', addPlace);
 
-['placeName', 'placeAddress', 'placeDesc'].forEach(id => {
-    document.getElementById(id).addEventListener('keypress', (e) => {
+['placeName', 'placeAddress', 'placeDesc'].forEach(function(id) {
+    document.getElementById(id).addEventListener('keypress', function(e) {
         if (e.key === 'Enter') addPlace();
     });
 });
